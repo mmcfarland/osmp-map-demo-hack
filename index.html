@@ -1,0 +1,54 @@
+<html>
+<head>
+   <link rel="stylesheet" href="http://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.3/leaflet.css" />
+</head>
+
+  <div id="map" style="width: 100%; height:100%"></div>
+
+  <input id="filter" style="position:absolute;top:10px;left:100px"/>
+
+  <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+  <script src="http://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.3/leaflet.js"></script>
+  <script type="text/javascript">
+    var map = L.map('map').setView([39.9505, -75.16], 11);
+
+    var baseL = L.tileLayer('http://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png', {
+          attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, &copy; <a href="http://cartodb.com/attributions">CartoDB</a>'
+    }).addTo(map);
+
+    var layer;
+   
+
+    $.getJSON('schools.json', function(schools) {
+       this.schools = schools;
+
+      layer = L.geoJson(schools, {
+          onEachFeature: function (feature, l) {
+            l.properties = feature.properties;
+          }
+        }).addTo(map);
+
+        layer.on('click', function(f) {
+          map.openPopup(f.layer.properties.FACILNAME_LABEL, f.latlng);   
+        });
+  });
+
+
+  $('#filter').keyup(function(e) {
+      if (e.keyCode === 13) {
+        var val = $('#filter').val().toLowerCase();
+
+        layer.getLayers().forEach(function(f) {
+          if (f.properties.FACILNAME_LABEL.toLowerCase().indexOf(val) > -1) {
+            console.log(f.properties);
+            f.setOpacity(1);
+          } else {
+            f.setOpacity(0);
+          }
+        });
+      }
+   });
+ 
+  </script>
+
+</html>
